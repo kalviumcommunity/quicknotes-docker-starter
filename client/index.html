@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head><meta charset="UTF-8" /><title>QuickNotes</title></head>
+  <body>
+    <h1>QuickNotes</h1>
+    <input id="text" placeholder="Write a note" />
+    <button onclick="add()">Add</button>
+    <ul id="list"></ul>
+    <script>
+      const API = "http://localhost:5000";
+      async function load() {
+        const res = await fetch(API + "/api/notes");
+        const notes = await res.json();
+        document.getElementById("list").innerHTML = notes.map((n) => "<li>" + n.text + "</li>").join("");
+      }
+      async function add() {
+        const input = document.getElementById("text");
+        await fetch(API + "/api/notes", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ text: input.value }),
+        });
+        input.value = "";
+        load();
+      }
+      load();
+    </script>
+  </body>
+</html>
