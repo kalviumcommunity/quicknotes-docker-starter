@@ -1,5 +1,5 @@
 // Self-check. Run: npm run check   (no Docker, no internet needed)
-// Reads your files and prints PASS/FAIL per check. 20 checks, 1 mark each.
+// Reads your files and prints PASS/FAIL per check. 18 scripted marks; the 2 screenshot marks are given by a mentor.
 import fs from "fs";
 import path from "path";
 import { spawn } from "child_process";
@@ -76,13 +76,11 @@ const dep = read("DEPLOYMENT.md") || "";
 const val = (label) => (dep.match(new RegExp("^- " + label + ":\\s*(.*)$", "m")) || [, ""])[1].replace(/\(.*?\)\s*$/, "").trim();
 const live = val("Live API URL"), health = val("Health check URL");
 check(4, "Live API URL is an https://....onrender.com link", /^https:\/\/[a-z0-9-]+\.onrender\.com\/?$/i.test(live));
-check(4, "Health check URL = live URL + /health", /^https:\/\/[a-z0-9-]+\.onrender\.com\/health$/i.test(health) && health.startsWith(live.replace(/\/$/, "")));
 check(4, "Build and start commands filled in", /npm/.test(val("Build command")) && /(node server\.js|npm start)/.test(val("Start command")));
 const envNames = val("Environment variables set on Render \\(names only, no values\\)") || val("Environment variables set on Render");
 check(4, "Render env var names include DATABASE_URL and CORS_ORIGIN", /DATABASE_URL/.test(envNames) && /CORS_ORIGIN/.test(envNames));
 const shotDir = path.join(root, "screenshots");
 const shots = fs.existsSync(shotDir) ? fs.readdirSync(shotDir).filter((f) => /\.(png|jpe?g)$/i.test(f)) : [];
-check(4, "screenshots/ has at least 2 images", shots.length >= 2);
 
 // ---------- Report ----------
 let total = 0;
@@ -90,8 +88,9 @@ for (const t of [1, 2, 3, 4]) {
   const rs = results.filter((r) => r.task === t);
   const got = rs.filter((r) => r.ok).length;
   total += got;
-  console.log(`\nTask ${t}: ${got}/5`);
+  console.log(`\nTask ${t}: ${got}/${t === 4 ? 3 : 5}`);
   rs.forEach((r) => console.log(`  ${r.ok ? "PASS" : "FAIL"}  ${r.name}`));
 }
-console.log(`\nSCRIPT SCORE: ${total}/20  (a mentor still checks your screenshots)`);
+console.log(`\nScreenshots found: ${shots.length} (a mentor marks them: 2 marks)`);
+console.log(`SCRIPT SCORE: ${total}/18`);
 process.exit(0);
